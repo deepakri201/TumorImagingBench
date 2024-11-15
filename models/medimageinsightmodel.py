@@ -19,10 +19,7 @@ class MedImageInsight:
     """Wrapper class for medical image classification model."""
 
     def __init__(
-            self,
-            model_dir: str,
-            vision_model_name: str,
-            language_model_name: str
+        self, model_dir: str, vision_model_name: str, language_model_name: str
     ) -> None:
         """Initialize the medical image classifier.
 
@@ -44,19 +41,15 @@ class MedImageInsight:
         """Load the model and necessary components."""
         try:
             # Load configuration
-            config_path = os.path.join(self.model_dir, 'config.yaml')
+            config_path = os.path.join(self.model_dir, "config.yaml")
             self.opt = load_opt_from_config_files([config_path])
 
             # Set paths
-            self.opt['LANG_ENCODER']['PRETRAINED_TOKENIZER'] = os.path.join(
-                self.model_dir,
-                'language_model',
-                'clip_tokenizer_4.16.2'
+            self.opt["LANG_ENCODER"]["PRETRAINED_TOKENIZER"] = os.path.join(
+                self.model_dir, "language_model", "clip_tokenizer_4.16.2"
             )
-            self.opt['UNICL_MODEL']['PRETRAINED'] = os.path.join(
-                self.model_dir,
-                'vision_model',
-                self.vision_model_name
+            self.opt["UNICL_MODEL"]["PRETRAINED"] = os.path.join(
+                self.model_dir, "vision_model", self.vision_model_name
             )
 
             # Initialize components
@@ -68,8 +61,8 @@ class MedImageInsight:
             self.model.to(self.device)
 
             # Load tokenizer
-            self.tokenize = build_tokenizer(self.opt['LANG_ENCODER'])
-            self.max_length = self.opt['LANG_ENCODER']['CONTEXT_LENGTH']
+            self.tokenize = build_tokenizer(self.opt["LANG_ENCODER"])
+            self.max_length = self.opt["LANG_ENCODER"]["CONTEXT_LENGTH"]
 
             print(f"Model loaded successfully on device: {self.device}")
 
@@ -89,21 +82,23 @@ class MedImageInsight:
         """
         try:
             # Remove header if present
-            if ',' in base64_str:
-                base64_str = base64_str.split(',')[1]
+            if "," in base64_str:
+                base64_str = base64_str.split(",")[1]
 
             image_bytes = base64.b64decode(base64_str)
             image = Image.open(io.BytesIO(image_bytes))
 
             # Convert grayscale (L) or grayscale with alpha (LA) to RGB
-            if image.mode in ('L', 'LA'):
-                image = image.convert('RGB')
+            if image.mode in ("L", "LA"):
+                image = image.convert("RGB")
 
             return image
         except Exception as e:
             raise ValueError(f"Failed to decode base64 image: {str(e)}")
 
-    def predict(self, images: List[str], labels: List[str], multilabel: bool = False) -> List[dict]:
+    def predict(
+        self, images: List[str], labels: List[str], multilabel: bool = False
+    ) -> List[dict]:
         """Perform zero shot classification on the input images.
 
         Args:
@@ -136,29 +131,28 @@ class MedImageInsight:
             results = []
             for prob_row in probs_np:
                 # Create label-prob pairs and sort by probability
-                label_probs = [(label, float(prob)) for label, prob in zip(labels, prob_row)]
+                label_probs = [
+                    (label, float(prob)) for label, prob in zip(labels, prob_row)
+                ]
                 label_probs.sort(key=lambda x: x[1], reverse=True)
 
                 # Create ordered dictionary from sorted pairs
-                results.append({
-                    label: prob
-                    for label, prob in label_probs
-                })
+                results.append({label: prob for label, prob in label_probs})
 
             return results
 
     def encode(self, images: List[str] = None, texts: List[str] = None):
 
         output = {
-            "image_embeddings"  : None,
-            "text_embeddings" : None,
+            "image_embeddings": None,
+            "text_embeddings": None,
         }
 
         if not self.model:
             raise RuntimeError("Model not loaded. Call load_model() first.")
 
         if not images and not texts:
-            raise  ValueError("You must provide either images or texts")
+            raise ValueError("You must provide either images or texts")
 
         if images is not None:
             with tempfile.TemporaryDirectory() as tmp_dir:
@@ -170,31 +164,33 @@ class MedImageInsight:
                         image_list.append(img)
                     except Exception as e:
                         raise ValueError(f"Failed to process image: {str(e)}")
-            images = torch.stack([self.preprocess(img) for img in image_list]).to(self.device)
+            images = torch.stack([self.preprocess(img) for img in image_list]).to(
+                self.device
+            )
             with torch.no_grad():
-                output["image_embeddings"] = self.model.encode_image(images).cpu().numpy()
+                output["image_embeddings"] = (
+                    self.model.encode_image(images).cpu().numpy()
+                )
 
         if texts is not None:
             text_tokens = self.tokenize(
                 texts,
-                padding='max_length',
+                padding="max_length",
                 max_length=self.max_length,
                 truncation=True,
-                return_tensors='pt'
+                return_tensors="pt",
             )
 
             # Move text tensors to the correct device
             text_tokens = {k: v.to(self.device) for k, v in text_tokens.items()}
-            output["text_embeddings"] = self.model.encode_text(text_tokens).cpu().numpy()
-
+            output["text_embeddings"] = (
+                self.model.encode_text(text_tokens).cpu().numpy()
+            )
 
         return output
 
     def run_inference_batch(
-            self,
-            images: List[Image.Image],
-            texts: List[str],
-            multilabel: bool = False
+        self, images: List[Image.Image], texts: List[str], multilabel: bool = False
     ) -> torch.Tensor:
         """Perform inference on batch of input images.
 
@@ -213,10 +209,10 @@ class MedImageInsight:
         # Process text
         text_tokens = self.tokenize(
             texts,
-            padding='max_length',
+            padding="max_length",
             max_length=self.max_length,
             truncation=True,
-            return_tensors='pt'
+            return_tensors="pt",
         )
 
         # Move text tensors to the correct device
@@ -235,5 +231,3 @@ class MedImageInsight:
                 probs = logits_per_image.softmax(dim=1)
 
         return probs
-
-
