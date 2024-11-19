@@ -1,0 +1,59 @@
+project: "."
+vars:
+    embedding_dim: 512
+    spacing: [1, 1, 1]
+_requires_:
+    - "$import monai"
+    - "$import torch"
+
+trainer:
+    _target_: pytorch_lightning.Trainer
+    benchmark: True
+    # Ablations - 80 epochs, 500 batches per epoch, 4 batch size, 4 GPUs / 148,134 dataset size ≈ 4.3 epochs
+    max_epochs: 25
+    accelerator: gpu
+    devices: 2
+    strategy: ddp
+    sync_batchnorm: True
+    precision: 16-mixed
+    log_every_n_steps: 100
+    logger: 
+        _target_: pytorch_lightning.loggers.WandbLogger
+        name: "PyramidFM"
+        project: CT_FM
+        save_dir: "/mnt/data1/PyramidFM/runs/logs"
+  
+    callbacks:
+        - _target_: pytorch_lightning.callbacks.ModelCheckpoint
+          dirpath: "/mnt/data1/PyramidFM/runs/checkpoints"
+          save_last: True
+          verbose: True
+          every_n_epochs: 1
+
+system:
+    _target_: lighter.LighterSystem
+    batch_size: 64
+    pin_memory: True
+    num_workers: 10
+
+    model:
+  
+    optimizer:
+        _target_: torch.optim.AdamW
+        params: "$@system#model.parameters()"
+        lr: 0.0001
+        weight_decay: 0.000001
+  
+    scheduler:
+        _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+        optimizer: "@system#optimizer"
+        T_max: "%trainer#max_epochs"
+        eta_min: 0.000001
+
+    datasets:
+        train:
+            _target_: monai.data.Dataset
+            data: "$[{'label': label, 'image': str(label).replace('annotations', 'images').replace('labels', 'images').replace('_grabcut', '')} for label in sorted(list(Path('/mnt/data1/datasets/ULS23/annotations').rglob('*.nii.gz')))]"
+            _requires_: "$from pathlib import Path"
+            transform:
+

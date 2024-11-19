@@ -1,0 +1,115 @@
+vars#num_crops: 4
+system#model:
+    _target_: project.models.frameworks.simclr.SimCLR
+    num_ftrs: '@vars#embedding_dim'
+    backbone:
+
+system#criterion:
+    _target_: project.loss.intrasample_ntxent_loss.IntraSampleNTXEntLoss
+    temperature: 0.1
+    permute: False
+    variance_weight: 0.5
+
+system#datasets#train#transform:
+    # Parent torchvision Compose so that the monai Compose children can have different map_items.
+    # A parent monai Compose would force all children to have its map_items.
+        _target_: monai.transforms.Compose
+        map_items: False
+        transforms:
+            - _target_: monai.transforms.LoadImaged
+              keys: ["image", "label"]
+              image_only: True
+            - _target_: monai.transforms.EnsureChannelFirstd
+              keys: ["image", "label"]
+            - _target_: monai.transforms.Orientationd
+              keys: ["image", "label"]
+              axcodes: SPL
+              lazy: True
+            - _target_: monai.transforms.Spacingd
+              keys: ["image", "label"]
+              pixdim: [1, 1, 1]
+              mode: ["bilinear", "nearest"]
+              lazy: True
+            - _target_: monai.transforms.CopyItemsd
+              keys: "image"
+              names: "positive"
+            - _target_: monai.transforms.CopyItemsd
+              keys: "image"
+              names: "negative"
+            - _target_: monai.transforms.Compose
+              map_items: False
+              transforms:
+                  - _target_: monai.transforms.RandCropByPosNegLabeld
+                    keys: "positive"
+                    label_key: "label"
+                    spatial_size: [50, 50, 50]
+                    pos: 1
+                    neg: 0
+                    allow_smaller: True
+                    num_samples: 1
+                    image_key: "positive"
+                    image_threshold: 0
+                  - _target_: monai.transforms.Lambda
+                    func: '$lambda x: x[0]'
+            - _target_: monai.transforms.Compose
+              map_items: True
+              transforms:
+                  - _target_: monai.transforms.RandCropByPosNegLabeld
+                    keys: "negative"
+                    label_key: "label"
+                    spatial_size: [50, 50, 50]
+                    pos: 0
+                    neg: 1
+                    allow_smaller: True
+                    num_samples: "@vars#num_crops"
+                    image_key: "negative"
+                    image_threshold: 0
+                  - _target_: monai.transforms.ScaleIntensityRanged
+                    keys: ["positive", "negative"]
+                    a_min: -1024
+                    a_max: 2048
+                    b_min: 0
+                    b_max: 1
+                    clip: True
+            - _target_: monai.transforms.Lambda
+              func: '$lambda x: {"view_0": (x[0]["positive"], *[el["negative"] for el in x])}'
+            - _target_: monai.transforms.CopyItemsd
+              keys: "view_0"
+              names: "view_1"
+            - _target_: project.transforms.ssl.DictifyTransform
+              keys: ["view_0"]
+              transform:
+                  _target_: monai.transforms.Compose
+                  transforms:
+                      - _target_: project.transforms.ssl.RandomResizedCrop
+                        size: [50, 50, 50]
+                        scale: [0.5, 1.0]
+                      - _target_: monai.transforms.RandFlip
+                        prob: 0.3
+                        spatial_axis: 0
+                      - _target_: monai.transforms.RandHistogramShift
+                        num_control_points: 10
+                        prob: 0.3
+                      - _target_: monai.transforms.RandGaussianSmooth
+                        prob: 0.3
+                        sigma_x: [0.1, 0.5]
+            - _target_: project.transforms.ssl.DictifyTransform
+              keys: ["view_1"]
+              transform:
+                  _target_: monai.transforms.Compose
+                  transforms:
+                      - _target_: project.transforms.ssl.RandomResizedCrop
+                        size: [50, 50, 50]
+                        scale: [0.5, 1.0]
+                      - _target_: monai.transforms.RandFlip
+                        prob: 0.3
+                        spatial_axis: 0
+                      - _target_: monai.transforms.RandHistogramShift
+                        num_control_points: 10
+                        prob: 0.3
+                      - _target_: monai.transforms.RandGaussianSmooth
+                        prob: 0.3
+                        sigma_x: [0.1, 0.5]
+
+            - _target_: monai.transforms.Lambda
+              func: '$lambda x: {"input": [(el1.as_tensor(), el2.as_tensor()) for (el1, el2) in zip(x["view_0"], x["view_1"])]}'
