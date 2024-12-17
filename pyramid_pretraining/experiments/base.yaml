@@ -21,11 +21,11 @@ trainer:
         _target_: pytorch_lightning.loggers.WandbLogger
         name: "PyramidFM"
         project: CT_FM
-        save_dir: "/mnt/data1/PyramidFM/runs/logs"
+        save_dir: $f"/mnt/data1/PyramidFM/runs/logs/{@vars#name}"
   
     callbacks:
         - _target_: pytorch_lightning.callbacks.ModelCheckpoint
-          dirpath: "/mnt/data1/PyramidFM/runs/checkpoints"
+          dirpath: $f"/mnt/data1/PyramidFM/runs/checkpoints/{@vars#name}"
           save_last: True
           verbose: True
           every_n_epochs: 1
@@ -52,7 +52,8 @@ system:
 
     datasets:
         train:
-            _target_: monai.data.Dataset
+            _target_: monai.data.PersistentDataset
+            cache_dir: $f"/mnt/data1/PyramidFM/runs/cache/{@vars#name}"
             data: "$[{'label': label, 'image': str(label).replace('annotations', 'images').replace('labels', 'images').replace('_grabcut', '')} for label in sorted(list(Path('/mnt/data1/datasets/ULS23/annotations').rglob('*.nii.gz')))]"
             _requires_: "$from pathlib import Path"
             transform:
