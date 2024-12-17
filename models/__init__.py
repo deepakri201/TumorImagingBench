@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import torch
 import torch.nn as nn
 import monai
+import matplotlib.pyplot as plt
 from fmcib.preprocessing import SeedBasedPatchCropd
 
 
@@ -38,6 +39,7 @@ def get_transforms(
                 keys=["image"], ensure_channel_first=True, reader="ITKReader"
             ),
             monai.transforms.EnsureTyped(keys=["image"]),
+            monai.transforms.Orientationd(keys=["image"], axcodes="LPS"),
             monai.transforms.Spacingd(
                 keys=["image"],
                 pixdim=spacing,
@@ -46,7 +48,6 @@ def get_transforms(
                 align_corners=True,
                 diagonal=True,
             ),
-            monai.transforms.Orientationd(keys=["image"], axcodes="LPS"),
             SeedBasedPatchCropd(
                 keys=["image"],
                 roi_size=spatial_size,
@@ -67,3 +68,26 @@ def get_transforms(
         ]
     )
     return T
+
+
+def plot_3d_image(ret):
+    # Plot axial slice
+    plt.figure(figsize=(10, 10))
+    plt.subplot(3, 1, 1)
+    plt.imshow(ret[:, ret.shape[1] // 2, :, :].permute(1, 2, 0), cmap="gray")
+    plt.title("Axial")
+    plt.axis("off")
+
+    # Plot sagittal slice
+    plt.subplot(3, 1, 2)
+    plt.imshow(ret[:, :, ret.shape[2] // 2, :].permute(1, 2, 0), cmap="gray")
+    plt.title("Coronal")
+    plt.axis("off")
+
+    # Plot coronal slice
+    plt.subplot(3, 1, 3)
+    plt.imshow(ret[:, :, :, ret.shape[3] // 2].permute(1, 2, 0), cmap="gray")
+    plt.title("Sagittal")
+
+    plt.axis("off")
+    plt.show()
