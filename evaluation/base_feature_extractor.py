@@ -2,6 +2,7 @@ import sys
 import torch
 from tqdm import tqdm
 import pickle
+import multiprocessing
 
 sys.path.append('..')
 from models.ct_fm_extractor import CTFMExtractor
@@ -11,11 +12,12 @@ from models.voco_extractor import VocoExtractor
 from models.suprem_extractor import SUPREMExtractor
 from models.merlin_extractor import MerlinExtractor
 from models.medimageinsight_extractor import MedImageInsightExtractor
+from models.modelsgen_extractor import ModelsGenExtractor
 
 def get_model_list():
     """Return list of model classes to use for feature extraction"""
     return [
-       FMCIBExtractor
+       ModelsGenExtractor, CTFMExtractor, FMCIBExtractor, VISTA3DExtractor, VocoExtractor, SUPREMExtractor, MerlinExtractor, MedImageInsightExtractor
     ]
 
 def extract_features_for_model(model_class, get_split_data_fn, preprocess_row_fn):
@@ -52,10 +54,12 @@ def extract_all_features(get_split_data_fn, preprocess_row_fn):
     """Extract features using all models"""
     feature_dict = {}
     
-    for model_class in tqdm(get_model_list(), desc="Overall Progress", position=0):
-        feature_dict[model_class.__name__] = extract_features_for_model(
-            model_class, get_split_data_fn, preprocess_row_fn
-        )
+    with multiprocessing.Pool() as pool:
+        model_classes = get_model_list()
+        results = pool.starmap(extract_features_for_model, 
+                              [(model_class, get_split_data_fn, preprocess_row_fn) for model_class in model_classes])
+        for model_class, model_features in zip(model_classes, results):
+            feature_dict[model_class.__name__] = model_features
     
     return feature_dict
 

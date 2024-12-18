@@ -27,7 +27,7 @@ class BaseModel(ABC, nn.Module):
 
 
 def get_transforms(
-    orient="SPL",
+    orient="RAS",
     scale_range=(-1024, 2048),
     spatial_size=(48, 48, 48),
     spacing=(1, 1, 1),
