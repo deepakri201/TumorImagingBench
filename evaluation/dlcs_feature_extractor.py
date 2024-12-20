@@ -5,7 +5,7 @@ from base_feature_extractor import extract_all_features, save_features
 def get_split_data(split):
     """Get DLCS dataset split"""
     df = pd.read_csv("/mnt/data1/datasets/DukeLungNoduleDataset/DLCSD24_Annotations.csv")
-    return df[df["benchmark_split"] == split]
+    return df[df["benchmark_split"].str.startswith(split)]
 
 def preprocess_row(row):
     """Preprocess a row from DLCS dataset"""
