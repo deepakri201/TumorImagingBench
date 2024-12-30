@@ -4,7 +4,7 @@ import monai
 from fmcib.preprocessing import SeedBasedPatchCropd
 from . import BaseModel, get_transforms
 from huggingface_hub import hf_hub_download
-
+from loguru import logger
 
 class CTFMExtractor(BaseModel):
     def __init__(self):
@@ -33,9 +33,13 @@ class CTFMExtractor(BaseModel):
             )
 
         weights = torch.load(weights_path)
-        self.model.load_state_dict(
+        weights = {
+            k.replace("encoder.", ""): v for k, v in weights.items()
+        }
+        msg = self.model.load_state_dict(
             weights, strict=False
         )  # Set strict to False as we load only the encoder
+        logger.info(msg)
         self.model.eval()
 
     def preprocess(self, x):

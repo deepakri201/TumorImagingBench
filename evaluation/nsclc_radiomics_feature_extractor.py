@@ -19,7 +19,7 @@ def preprocess_row(row):
 def extract_features():
     """Extract features for LUNA dataset"""
     features = extract_all_features(get_split_data, preprocess_row)
-    save_features(features, 'nsclc_radiomics_features.pkl')
+    save_features(features, 'features/nsclc_radiomics.pkl')
 
 if __name__ == "__main__":
     extract_features()

@@ -5,7 +5,7 @@ from fmcib.preprocessing import SeedBasedPatchCropd
 from . import BaseModel, get_transforms
 from .unet3d import UNet3D
 from huggingface_hub import hf_hub_download
-
+from loguru import logger
 
 class SUPREMExtractor(BaseModel):
     def __init__(self):
@@ -29,7 +29,7 @@ class SUPREMExtractor(BaseModel):
         model_dict = torch.load(weights_path)["net"]
         store_dict = self.model.state_dict()
 
-        print("Loading SuPreM UNet backbone pretrained weights")
+        logger.info("Loading SuPreM UNet backbone pretrained weights")
         decoder_keys = ["up_tr", "out_tr"]
         amount = 0
         for key in model_dict.keys():
@@ -40,7 +40,7 @@ class SUPREMExtractor(BaseModel):
                 store_dict[new_key] = model_dict[key]
                 amount += 1
 
-        print(f"Loaded {amount}/{len(store_dict.keys())} keys")
+        logger.info(f"Loaded {amount}/{len(store_dict.keys())} keys")
         # Modify prefix of weights to match model structure
         self.model.load_state_dict(store_dict)
         self.model = Encoder(self.model)

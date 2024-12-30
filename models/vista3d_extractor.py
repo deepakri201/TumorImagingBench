@@ -5,7 +5,7 @@ from fmcib.preprocessing import SeedBasedPatchCropd
 from . import BaseModel, get_transforms
 import wget
 import os
-
+from loguru import logger
 
 class VISTA3DExtractor(BaseModel):
     def __init__(self):
@@ -43,9 +43,11 @@ class VISTA3DExtractor(BaseModel):
         weights = {
             k.replace("image_encoder.encoder.", ""): v for k, v in weights.items()
         }
-        self.model.load_state_dict(
+        msg = self.model.load_state_dict(
             weights, strict=False
         )  # Set strict to False as we load only the encoder
+
+        logger.info(msg)
         self.model.eval()
 
     def preprocess(self, x):

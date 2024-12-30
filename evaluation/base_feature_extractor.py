@@ -13,11 +13,12 @@ from models.suprem_extractor import SUPREMExtractor
 from models.merlin_extractor import MerlinExtractor
 from models.medimageinsight_extractor import MedImageInsightExtractor
 from models.modelsgen_extractor import ModelsGenExtractor
+from models.pyramid_extractor import PyramidExtractor
 
 def get_model_list():
     """Return list of model classes to use for feature extraction"""
     return [
-       ModelsGenExtractor, CTFMExtractor, FMCIBExtractor, VISTA3DExtractor, VocoExtractor, SUPREMExtractor, MerlinExtractor, MedImageInsightExtractor
+      FMCIBExtractor, CTFMExtractor, PyramidExtractor, VISTA3DExtractor, VocoExtractor, SUPREMExtractor, MerlinExtractor, MedImageInsightExtractor, ModelsGenExtractor
     ]
 
 def extract_features_for_model(model_class, get_split_data_fn, preprocess_row_fn):

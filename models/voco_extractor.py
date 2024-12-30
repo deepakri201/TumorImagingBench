@@ -4,7 +4,7 @@ import monai
 from fmcib.preprocessing import SeedBasedPatchCropd
 from . import BaseModel, get_transforms
 from huggingface_hub import hf_hub_download
-
+from loguru import logger
 
 class VocoExtractor(BaseModel):
     def __init__(self):
@@ -42,7 +42,8 @@ class VocoExtractor(BaseModel):
             )
             for k in current_model_dict
         }
-        self.model.load_state_dict(new_state_dict, strict=True)
+        msg = self.model.load_state_dict(new_state_dict, strict=True)
+        logger.info(msg)
         self.model.eval()
         self.model = self.model.swinViT
 
