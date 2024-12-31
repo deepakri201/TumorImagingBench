@@ -70,3 +70,28 @@ def save_features(feature_dict, output_file):
         pickle.dump(feature_dict, f)
     print(f"Features saved to {output_file}")
     print(feature_dict)
+
+
+if __name__ == "__main__":
+    import pandas as pd
+    def get_split_data(split):
+        """Get LUNA dataset split"""
+        split_paths = {
+            "train": "/home/suraj/Repositories/FM-extractors-radiomics/data/eval/luna16/luna16/train.csv",
+            "val": "/home/suraj/Repositories/FM-extractors-radiomics/data/eval/luna16/luna16/val.csv",
+            "test": "/home/suraj/Repositories/FM-extractors-radiomics/data/eval/luna16/luna16/test.csv"
+        }
+        if split not in split_paths:
+            raise ValueError(f"Invalid split: {split}")
+        return pd.read_csv(split_paths[split])[:10]
+
+    def preprocess_row(row):
+        """Preprocess a row from LUNA dataset"""
+        return row.copy()
+
+    def extract_features():
+        """Extract features for LUNA dataset"""
+        features = extract_all_features(get_split_data, preprocess_row)
+        save_features(features, 'features/test.pkl')
+
+    extract_features()
