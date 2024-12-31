@@ -10,7 +10,7 @@ system#criterion:
     _target_: project.loss.intrasample_ntxent_loss.IntraSampleNTXEntLoss
     temperature: 0.1
     permute: False
-    variance_weight: 0.5
+    variance_weight: 0
 
 system#datasets#train#transform:
     # Parent torchvision Compose so that the monai Compose children can have different map_items.

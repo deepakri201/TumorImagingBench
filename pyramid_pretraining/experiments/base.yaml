@@ -10,17 +10,17 @@ trainer:
     _target_: pytorch_lightning.Trainer
     benchmark: True
     # Ablations - 80 epochs, 500 batches per epoch, 4 batch size, 4 GPUs / 148,134 dataset size ≈ 4.3 epochs
-    max_epochs: 25
+    max_epochs: 100
     accelerator: gpu
-    devices: 2
+    devices: 3
     strategy: ddp
     sync_batchnorm: True
     precision: 16-mixed
     log_every_n_steps: 100
     logger: 
         _target_: pytorch_lightning.loggers.WandbLogger
-        name: "PyramidFM"
-        project: CT_FM
+        name: "@vars#name"
+        project: "PyramidFM"
         save_dir: $f"/mnt/data1/PyramidFM/runs/logs/{@vars#name}"
   
     callbacks:
@@ -32,9 +32,9 @@ trainer:
 
 system:
     _target_: lighter.LighterSystem
-    batch_size: 64
+    batch_size: 32
     pin_memory: True
-    num_workers: 10
+    num_workers: 8
 
     model:
   
@@ -52,8 +52,7 @@ system:
 
     datasets:
         train:
-            _target_: monai.data.PersistentDataset
-            cache_dir: $f"/mnt/data1/PyramidFM/runs/cache/{@vars#name}"
+            _target_: monai.data.Dataset
             data: "$[{'label': label, 'image': str(label).replace('annotations', 'images').replace('labels', 'images').replace('_grabcut', '')} for label in sorted(list(Path('/mnt/data1/datasets/ULS23/annotations').rglob('*.nii.gz')))]"
             _requires_: "$from pathlib import Path"
             transform:
