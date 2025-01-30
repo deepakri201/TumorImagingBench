@@ -1,8 +1,9 @@
 import pandas as pd
 from base_feature_extractor import extract_all_features, save_features
 
+
 def get_split_data(split):
-    """Get LUNA dataset split"""
+    """Get NSCLC-Radiomics dataset split."""
     split_paths = {
         "train": "/home/suraj/Repositories/FM-extractors-radiomics/data/eval/nsclc_radiomics/train_annotations.csv",
         "val": "/home/suraj/Repositories/FM-extractors-radiomics/data/eval/nsclc_radiomics/val_annotations.csv",
@@ -12,14 +13,17 @@ def get_split_data(split):
         raise ValueError(f"Invalid split: {split}")
     return pd.read_csv(split_paths[split])
 
+
 def preprocess_row(row):
-    """Preprocess a row from LUNA dataset"""
-    return row.copy()
+    """Preprocess a row from the NSCLC-Radiomics dataset."""
+    return row
+
 
 def extract_features():
-    """Extract features for LUNA dataset"""
+    """Extract features for the NSCLC-Radiomics dataset."""
     features = extract_all_features(get_split_data, preprocess_row)
     save_features(features, 'features/nsclc_radiomics.pkl')
+
 
 if __name__ == "__main__":
     extract_features()
