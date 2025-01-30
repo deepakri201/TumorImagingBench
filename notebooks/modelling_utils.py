@@ -4,7 +4,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import roc_auc_score
 import plotly.express as px
 
-def train_knn_classifier(train_items, train_labels, val_items, val_labels, n_trials=30):
+def train_knn_classifier(train_items, train_labels, val_items, val_labels):
     """
     Train a KNN classifier with hyperparameter optimization using Optuna.
     
@@ -104,7 +104,7 @@ def plot_model_comparison(test_accuracies_dict):
     
     return fig
 
-def split_shuffle_data(items, labels, train_ratio=0.5, val_ratio=0.2, random_seed=42):
+def split_shuffle_data(items, labels, train_ratio=0.5, val_ratio=0.2, random_seed=42, stratify=False):
     """
     Split and shuffle data into train, validation and test sets.
     
@@ -114,25 +114,46 @@ def split_shuffle_data(items, labels, train_ratio=0.5, val_ratio=0.2, random_see
         train_ratio: Ratio of training data
         val_ratio: Ratio of validation data
         random_seed: Random seed for reproducibility
+        stratify: Whether to stratify splits based on label distribution
         
     Returns:
         tuple: (train_items, train_labels, val_items, val_labels, test_items, test_labels)
     """
-    # Shuffle the data
-    rng = np.random.default_rng(random_seed)
-    shuffled_indices = rng.permutation(len(labels))
-    items = items[shuffled_indices]
-    labels = np.array(labels)[shuffled_indices]
-    
-    # Split into train, val, test
-    train_size = int(train_ratio * len(labels))
-    val_size = int(val_ratio * len(labels))
-    
-    train_items = items[:train_size]
-    train_labels = labels[:train_size]
-    val_items = items[train_size:train_size+val_size]
-    val_labels = labels[train_size:train_size+val_size]
-    test_items = items[train_size+val_size:]
-    test_labels = labels[train_size+val_size:]
+    if stratify:
+        from sklearn.model_selection import train_test_split
+        
+        # First split off the test set
+        test_ratio = 1 - train_ratio - val_ratio
+        train_val_items, test_items, train_val_labels, test_labels = train_test_split(
+            items, labels, 
+            test_size=test_ratio,
+            random_state=random_seed,
+            stratify=labels
+        )
+        
+        # Then split the remaining data into train and validation
+        train_items, val_items, train_labels, val_labels = train_test_split(
+            train_val_items, train_val_labels,
+            test_size=val_ratio/(train_ratio + val_ratio),
+            random_state=random_seed,
+            stratify=train_val_labels
+        )
+    else:
+        # Shuffle the data
+        rng = np.random.default_rng(random_seed)
+        shuffled_indices = rng.permutation(len(labels))
+        items = items[shuffled_indices]
+        labels = np.array(labels)[shuffled_indices]
+        
+        # Split into train, val, test
+        train_size = int(train_ratio * len(labels))
+        val_size = int(val_ratio * len(labels))
+        
+        train_items = items[:train_size]
+        train_labels = labels[:train_size]
+        val_items = items[train_size:train_size+val_size]
+        val_labels = labels[train_size:train_size+val_size]
+        test_items = items[train_size+val_size:]
+        test_labels = labels[train_size+val_size:]
     
     return train_items, train_labels, val_items, val_labels, test_items, test_labels
