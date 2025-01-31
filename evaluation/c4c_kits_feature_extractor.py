@@ -9,7 +9,7 @@ def get_split_data(split):
     }
     if split not in split_paths:
         print(f"Warning: Invalid split '{split}' for C4C-KiTS dataset.")
-        return pd.DataFrame()
+        return None
     return pd.read_csv(split_paths[split])
 
 

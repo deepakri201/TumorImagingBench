@@ -42,14 +42,13 @@ def extract_features_for_model(model_class, get_split_data_fn, preprocess_row_fn
     with torch.no_grad():
         for split in ["train", "val", "test"]:
             split_df = get_split_data_fn(split)
+            if split_df is None:
+                continue
+
             model_features[split] = []
 
-            for row in tqdm(
-                split_df.itertuples(index=False),
-                total=len(split_df),
-                desc=f"Processing {split} set",
-                position=2,
-                leave=False
+            for _, row in tqdm(
+                split_df.iterrows(), total=len(split_df)
             ):
                 row = preprocess_row_fn(row)
                 if row is None:
