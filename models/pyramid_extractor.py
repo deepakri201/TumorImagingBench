@@ -6,8 +6,8 @@ from . import BaseModel, get_transforms
 from huggingface_hub import hf_hub_download
 from loguru import logger
 
-class PyramidExtractor(BaseModel):
-    def __init__(self):
+class BasePyramidExtractor(BaseModel):
+    def __init__(self, weights=None):
         super().__init__()
         self.model = monai.networks.nets.segresnet_ds.SegResEncoder(
             blocks_down=(1, 2, 2, 4, 4),
@@ -24,15 +24,17 @@ class PyramidExtractor(BaseModel):
             spacing=(1, 1, 1),
         )
 
-    def load(self, weights_path: str = "/mnt/data1/PyramidFM/runs/checkpoints/baseline/epoch=99-step=41100.ckpt"):
+        self.weights = weights
+
+    def load(self):
         # Download weights from huggingface if path not provided
-        if weights_path is None:
+        if self.weights is None:
             weights_path = hf_hub_download(
                 repo_id="surajpaib/CT-FM-SegResNet",
                 filename="pretrained_segresnet.torch",
             )
 
-        weights = torch.load(weights_path)['state_dict']
+        weights = torch.load(self.weights)['state_dict']
         weights = {
             k.replace("model._orig_mod.backbone.", ""): v for k, v in weights.items()
         }
@@ -48,3 +50,13 @@ class PyramidExtractor(BaseModel):
     def forward(self, x):
         with torch.no_grad():
             return self.model(x)
+        
+
+class PyramidExtractorVar(BasePyramidExtractor):
+    def __init__(self) -> None:
+        super().__init__(weights="/mnt/data1/PyramidFM/runs/checkpoints/baseline/epoch=99-step=41100.ckpt")
+
+
+class PyramidExtractorNoVar(BasePyramidExtractor):
+    def __init__(self) -> None:
+        super().__init__(weights="/mnt/data1/PyramidFM/runs/checkpoints/baseline_no_var/epoch=99-step=41100.ckpt")

@@ -13,7 +13,7 @@ from models.suprem_extractor import SUPREMExtractor
 from models.merlin_extractor import MerlinExtractor
 from models.medimageinsight_extractor import MedImageInsightExtractor
 from models.modelsgen_extractor import ModelsGenExtractor
-from models.pyramid_extractor import PyramidExtractor
+from models.pyramid_extractor import PyramidExtractorVar, PyramidExtractorNoVar
 
 
 def get_model_list():
@@ -21,7 +21,8 @@ def get_model_list():
     return [
         FMCIBExtractor,
         CTFMExtractor,
-        PyramidExtractor,
+        PyramidExtractorVar,
+        PyramidExtractorNoVar,
         VISTA3DExtractor,
         VocoExtractor,
         SUPREMExtractor,
