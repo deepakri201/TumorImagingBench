@@ -1,23 +1,25 @@
+import logging
 import numpy as np
 import optuna
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
 import plotly.express as px
+
 
 def train_knn_classifier(train_items, train_labels, val_items, val_labels):
     """
     Train a KNN classifier with hyperparameter optimization using Optuna.
-    
+
     Args:
-        train_items: Training features
-        train_labels: Training labels
-        val_items: Validation features
-        val_labels: Validation labels
-        n_trials: Number of optimization trials
-        
+        train_items: Training feature matrix.
+        train_labels: Training labels.
+        val_items: Validation feature matrix.
+        val_labels: Validation labels.
+
     Returns:
-        best_model: Trained KNN classifier with best parameters
-        study: Optuna study object containing optimization results
+        best_model: Trained KNeighborsClassifier with the best parameters.
+        study: Optuna study object with the optimization results.
     """
     def objective(trial):
         k = trial.suggest_int('k', 1, 50)
@@ -25,135 +27,235 @@ def train_knn_classifier(train_items, train_labels, val_items, val_labels):
         knn.fit(train_items, train_labels)
         val_predictions = knn.predict_proba(val_items)
         if val_predictions.shape[1] == 2:  # Binary classification
-            return roc_auc_score(val_labels, val_predictions[:,1])
-        else:  # Multiclass classification
+            return roc_auc_score(val_labels, val_predictions[:, 1])
+        else:
             return roc_auc_score(val_labels, val_predictions, multi_class='ovr')
-    
-    # Create and optimize study with grid search sampler
-    param_grid = {'k': list(range(1, 51))}  # Grid of k values from 1 to 30
+
+    # Define grid of k values from 1 to 50
+    param_grid = {'k': list(range(1, 51))}
     study = optuna.create_study(
         direction='maximize',
         sampler=optuna.samplers.GridSampler(param_grid)
     )
-    study.optimize(objective, n_trials=len(param_grid['k']))  # Number of trials = number of k values
-    
-    # Train final model with best parameters
-    best_model = KNeighborsClassifier(
-        n_neighbors=study.best_params['k'],
-        metric='cosine'
-    )
+    study.optimize(objective, n_trials=len(param_grid['k']))
+
+    # Train the final model using the best hyperparameter
+    best_model = KNeighborsClassifier(n_neighbors=study.best_params['k'], metric='cosine')
     best_model.fit(train_items, train_labels)
-    
+
     return best_model, study
+
 
 def evaluate_model(model, test_items, test_labels):
     """
-    Evaluate a trained model on test data.
-    
+    Evaluate a trained classifier on test data using the ROC AUC score.
+
     Args:
-        model: Trained classifier
-        test_items: Test features
-        test_labels: Test labels
-        
+        model: Trained classifier.
+        test_items: Test feature matrix.
+        test_labels: Test labels.
+
     Returns:
-        float: ROC AUC score
+        ROC AUC score as a float.
     """
     test_predictions = model.predict_proba(test_items)
     if test_predictions.shape[1] == 2:  # Binary classification
         return roc_auc_score(test_labels, test_predictions[:, 1])
-    else:  # Multiclass classification
+    else:
         return roc_auc_score(test_labels, test_predictions, multi_class='ovr')
+
 
 def plot_model_comparison(test_accuracies_dict):
     """
-    Create a bar plot comparing model performances.
-    
+    Create a minimalist and elegant bar plot comparing model performances using Plotly Express.
+
     Args:
-        test_accuracies_dict: Dictionary mapping model names to their test accuracies
-        
+        test_accuracies_dict: Dictionary mapping model names to their test accuracies.
+
     Returns:
-        fig: Plotly figure object
+        Plotly figure object.
     """
     fig = px.bar(
         x=list(test_accuracies_dict.keys()),
         y=list(test_accuracies_dict.values()),
-        labels={'x': 'Model Name', 'y': 'Test Accuracy'},
-        title='Test AUC Comparison Between Models',
-        template='plotly_white',
-        text=[f'{val:.3f}' for val in test_accuracies_dict.values()],
+        labels={'x': 'Model', 'y': 'Accuracy'},
+        title='Test AUC Comparison',
+        template='simple_white',
         width=500,
-        height=500,
+        height=400,
     )
-
-    fig.update_traces(
-        textposition='outside',
-        marker_color='#1f77b4'
-    )
-
+    # Use a subtle blue color and position text inside each bar with minimal formatting
+    fig.update_traces(marker_color='#ADD8E6', marker_opacity=0.8, texttemplate='%{y:.2f}', textposition='auto')
     fig.update_layout(
-        showlegend=False,
-        plot_bgcolor='rgba(0,0,0,0)',
-        yaxis_range=[0,1],
-        xaxis_linecolor='black',
-        yaxis_linecolor='black',
-        xaxis_ticks='',
-        yaxis_ticks='',
-        title_x=0.5,
-        font=dict(size=10)
+        margin=dict(l=20, r=20, t=40, b=20),
+        xaxis=dict(showline=False, showgrid=False, tickfont=dict(size=12)),
+        yaxis=dict(showgrid=True, gridcolor='lightgrey', tickfont=dict(size=12)),
+        title=dict(x=0.5, xanchor='center'),
+        font=dict(size=12, family="Arial"),
+        showlegend=False
     )
-    
     return fig
+
 
 def split_shuffle_data(items, labels, train_ratio=0.5, val_ratio=0.2, random_seed=42, stratify=False):
     """
-    Split and shuffle data into train, validation and test sets.
-    
+    Split and shuffle data into training, validation, and test sets.
+
     Args:
-        items: Feature array
-        labels: Label array
-        train_ratio: Ratio of training data
-        val_ratio: Ratio of validation data
-        random_seed: Random seed for reproducibility
-        stratify: Whether to stratify splits based on label distribution
-        
+        items: Feature array.
+        labels: Label array.
+        train_ratio: Ratio of data used for training.
+        val_ratio: Ratio of data used for validation.
+        random_seed: Random seed for reproducibility.
+        stratify: If True, stratify splits based on label distribution.
+
     Returns:
-        tuple: (train_items, train_labels, val_items, val_labels, test_items, test_labels)
+        Tuple containing (train_items, train_labels, val_items, val_labels, test_items, test_labels).
     """
     if stratify:
-        from sklearn.model_selection import train_test_split
-        
-        # First split off the test set
+        # First, split off the test set
         test_ratio = 1 - train_ratio - val_ratio
         train_val_items, test_items, train_val_labels, test_labels = train_test_split(
-            items, labels, 
+            items, labels,
             test_size=test_ratio,
             random_state=random_seed,
             stratify=labels
         )
-        
-        # Then split the remaining data into train and validation
+        # Then, split the remaining data into training and validation sets
         train_items, val_items, train_labels, val_labels = train_test_split(
             train_val_items, train_val_labels,
-            test_size=val_ratio/(train_ratio + val_ratio),
+            test_size=val_ratio / (train_ratio + val_ratio),
             random_state=random_seed,
             stratify=train_val_labels
         )
     else:
-        # Shuffle the data
         rng = np.random.default_rng(random_seed)
         shuffled_indices = rng.permutation(len(labels))
         items = items[shuffled_indices]
         labels = np.array(labels)[shuffled_indices]
-        
-        # Split into train, val, test
+
         train_size = int(train_ratio * len(labels))
         val_size = int(val_ratio * len(labels))
-        
+
         train_items = items[:train_size]
         train_labels = labels[:train_size]
-        val_items = items[train_size:train_size+val_size]
-        val_labels = labels[train_size:train_size+val_size]
-        test_items = items[train_size+val_size:]
-        test_labels = labels[train_size+val_size:]
-    
+        val_items = items[train_size:train_size + val_size]
+        val_labels = labels[train_size:train_size + val_size]
+        test_items = items[train_size + val_size:]
+        test_labels = labels[train_size + val_size:]
     return train_items, train_labels, val_items, val_labels, test_items, test_labels
+
+
+def extract_model_features(data, skip_model="MedImageInsightExtractor"):
+    """
+    Concatenate features from the train, validation, and test sets for each model.
+
+    Args:
+        data (dict): Dictionary where each key is a model name and each value is a dict 
+                     with lists for 'train', 'val', and 'test'. Each list contains 
+                     dictionaries with a "feature" key.
+        skip_model (str): Model name to skip during feature extraction.
+
+    Returns:
+        Dictionary mapping model names to a concatenated numpy array of features.
+    """
+    model_features = {}
+    for model_name, splits in data.items():
+        if model_name == skip_model:
+            continue
+        train_features = np.vstack([entry["feature"] for entry in splits["train"]])
+        val_features = np.vstack([entry["feature"] for entry in splits["val"]])
+        test_features = np.vstack([entry["feature"] for entry in splits["test"]])
+        all_features = np.concatenate([train_features, val_features, test_features])
+        model_features[model_name] = all_features
+    return model_features
+
+
+def compute_knn_indices(model_features, num_neighbors=10, metric="cosine"):
+    """
+    Compute k-nearest neighbor indices (excluding the sample itself) for each model's features.
+
+    Args:
+        model_features (dict): Dictionary mapping model names to feature arrays.
+        num_neighbors (int): Number of nearest neighbors to retrieve (excluding self).
+        metric (str): Distance metric to use.
+
+    Returns:
+        Dictionary mapping model names to an array of nearest neighbor indices.
+    """
+    model_neighbors = {}
+    for model_name, features in model_features.items():
+        nn_model = NearestNeighbors(n_neighbors=num_neighbors + 1, metric=metric)
+        nn_model.fit(features)
+        _, indices = nn_model.kneighbors(features)
+        model_neighbors[model_name] = indices[:, 1:]  # Exclude self-neighbor
+    return model_neighbors
+
+
+def compute_overlap_matrix(model_neighbors):
+    """
+    Compute average mutual k-nearest neighbor overlap scores between pairs of models.
+
+    For each pair of models, this function calculates the average overlap score based on mutual nearest neighbors.
+    If the number of samples between models does not match, a warning is issued and that pair is skipped.
+
+    Args:
+        model_neighbors (dict): Dictionary mapping model names to arrays of neighbor indices.
+
+    Returns:
+        A tuple (overlap_matrix, model_list), where overlap_matrix is a symmetric numpy array of
+        average overlap scores and model_list is a list of corresponding model names.
+    """
+    model_list = list(model_neighbors.keys())
+    n_models = len(model_list)
+    overlap_matrix = np.full((n_models, n_models), np.nan)
+
+    for i in range(n_models):
+        neighbors_a = model_neighbors[model_list[i]]
+        for j in range(i + 1, n_models):
+            neighbors_b = model_neighbors[model_list[j]]
+            if neighbors_a.shape[0] != neighbors_b.shape[0]:
+                logging.warning(
+                    "Number of samples in %s and %s do not match. Skipping pair.",
+                    model_list[i], model_list[j]
+                )
+                continue
+
+            # Determine overlap using broadcasting
+            common_flags = (neighbors_a[:, :, None] == neighbors_b[:, None, :]).any(axis=2)
+            sample_overlaps = np.sum(common_flags, axis=1)
+            avg_overlap = np.mean(sample_overlaps)
+
+            overlap_matrix[i, j] = avg_overlap
+            overlap_matrix[j, i] = avg_overlap
+    return overlap_matrix, model_list
+
+
+def plot_overlap_matrix(overlap_matrix, model_list, title="Mutual k-Nearest Neighbors Overlap Scores", width=600, tickangle=45):
+    """
+    Plot the mutual k-nearest neighbor overlap matrix using Plotly Express.
+
+    Args:
+        overlap_matrix (numpy.ndarray): Square matrix with average overlap scores.
+        model_list (list): List of model names corresponding to the matrix axes.
+        title (str): Title of the plot.
+        width (int): Width of the plot.
+        tickangle (int): Angle for x-axis tick labels.
+
+    Returns:
+        Plotly figure object.
+    """
+    fig = px.imshow(
+        overlap_matrix,
+        labels={"x": "Model", "y": "Model", "color": "Average Overlap"},
+        x=model_list,
+        y=model_list,
+        color_continuous_scale="rdbu"
+    )
+    fig.update_layout(
+        title=title,
+        width=width,
+        xaxis_tickangle=tickangle,
+        template="simple_white"
+    )
+    return fig
