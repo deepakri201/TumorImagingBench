@@ -32,9 +32,9 @@ trainer:
 
 system:
     _target_: lighter.LighterSystem
-    batch_size: 32
+    batch_size: 64
     pin_memory: True
-    num_workers: 8
+    num_workers: 12
 
     model:
   

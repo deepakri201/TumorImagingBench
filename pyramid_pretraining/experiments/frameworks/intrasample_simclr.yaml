@@ -1,4 +1,4 @@
-vars#num_crops: 4
+vars#num_crops: 1
 system#model:
     _target_: torch.compile
     model:

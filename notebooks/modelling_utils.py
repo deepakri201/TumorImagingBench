@@ -163,11 +163,15 @@ def extract_model_features(data, skip_model="MedImageInsightExtractor"):
     for model_name, splits in data.items():
         if model_name == skip_model:
             continue
-        train_features = np.vstack([entry["feature"] for entry in splits["train"]])
-        val_features = np.vstack([entry["feature"] for entry in splits["val"]])
-        test_features = np.vstack([entry["feature"] for entry in splits["test"]])
-        all_features = np.concatenate([train_features, val_features, test_features])
-        model_features[model_name] = all_features
+
+        features_to_concat = []
+        for split in ["train", "val", "test"]:
+            if split in splits and splits[split]:
+                # Stack features for this split and add to the list.
+                split_features = np.vstack([entry["feature"] for entry in splits[split]])
+                features_to_concat.append(split_features)
+        # Concatenate all split features along axis 0 if any exist; otherwise, use an empty array.
+        model_features[model_name] = np.concatenate(features_to_concat, axis=0) if features_to_concat else np.array([])
     return model_features
 
 
@@ -250,7 +254,7 @@ def plot_overlap_matrix(overlap_matrix, model_list, title="Mutual k-Nearest Neig
         labels={"x": "Model", "y": "Model", "color": "Average Overlap"},
         x=model_list,
         y=model_list,
-        color_continuous_scale="rdbu"
+        color_continuous_scale="Blues"
     )
     fig.update_layout(
         title=title,

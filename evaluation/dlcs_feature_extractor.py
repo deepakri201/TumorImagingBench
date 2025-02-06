@@ -11,7 +11,6 @@ def get_split_data(split):
 
 def preprocess_row(row):
     """Preprocess a row from DLCS dataset."""
-    row = row._asdict()
     row["image_path"] = f'/mnt/data1/datasets/DukeLungNoduleDataset/{row["ct_nifti_file"]}'
 
     if os.path.exists(row["image_path"]):
