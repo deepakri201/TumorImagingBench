@@ -60,3 +60,7 @@ class PyramidExtractorVar(BasePyramidExtractor):
 class PyramidExtractorNoVar(BasePyramidExtractor):
     def __init__(self) -> None:
         super().__init__(weights="/mnt/data1/PyramidFM/runs/checkpoints/baseline_no_var/epoch=99-step=41100.ckpt")
+
+class PyramidExtractorNumCrop1(BasePyramidExtractor):
+    def __init__(self) -> None:
+        super().__init__(weights="/mnt/data1/PyramidFM/runs/checkpoints/baseline_num_crop_1/epoch=99-step=20600.ckpt")
