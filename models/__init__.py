@@ -31,6 +31,7 @@ def get_transforms(
     scale_range=(-1024, 2048),
     spatial_size=(48, 48, 48),
     spacing=(1, 1, 1),
+    clamp=(0, 1)
 ):
     T = monai.transforms.Compose(
         [
@@ -59,8 +60,8 @@ def get_transforms(
                 keys="image",
                 a_min=scale_range[0],
                 a_max=scale_range[1],
-                b_min=0,
-                b_max=1,
+                b_min=clamp[0],
+                b_max=clamp[1],
                 clip=True,
             ),
             monai.transforms.SpatialPadd(keys=["image"], spatial_size=spatial_size),
