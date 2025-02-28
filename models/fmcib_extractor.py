@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import monai
-from fmcib.preprocessing import SeedBasedPatchCropd
 from . import BaseModel, get_transforms
 from fmcib.models import fmcib_model
 

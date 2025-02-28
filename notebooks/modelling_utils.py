@@ -65,7 +65,7 @@ def evaluate_model(model, test_items, test_labels):
         return roc_auc_score(test_labels, test_predictions, multi_class='ovr')
 
 
-def plot_model_comparison(test_accuracies_dict):
+def plot_model_comparison(test_accuracies_dict, width=500, height=400, font_size=20, marker_color="#ADD8E6"):
     """
     Create a minimalist and elegant bar plot comparing model performances using Plotly Express.
 
@@ -81,17 +81,17 @@ def plot_model_comparison(test_accuracies_dict):
         labels={'x': 'Model', 'y': 'Accuracy'},
         title='Test AUC Comparison',
         template='simple_white',
-        width=500,
-        height=400,
+        width=width,
+        height=height
     )
     # Use a subtle blue color and position text inside each bar with minimal formatting
-    fig.update_traces(marker_color='#ADD8E6', marker_opacity=0.8, texttemplate='%{y:.2f}', textposition='auto')
+    fig.update_traces(marker_color=marker_color, marker_opacity=0.8, texttemplate='%{y:.2f}', textposition='auto')
     fig.update_layout(
         margin=dict(l=20, r=20, t=40, b=20),
-        xaxis=dict(showline=False, showgrid=False, tickfont=dict(size=12)),
-        yaxis=dict(showgrid=True, gridcolor='lightgrey', tickfont=dict(size=12)),
+        xaxis=dict(showline=False, showgrid=False, tickfont=dict(size=font_size)),
+        yaxis=dict(showgrid=True, gridcolor='lightgrey', tickfont=dict(size=font_size)),
         title=dict(x=0.5, xanchor='center'),
-        font=dict(size=12, family="Arial"),
+        font=dict(size=font_size, family="Arial"),
         showlegend=False
     )
     return fig
