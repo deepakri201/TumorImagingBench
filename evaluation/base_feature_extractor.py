@@ -5,31 +5,21 @@ import pickle
 import multiprocessing
 
 sys.path.append('..')
-from models.ct_fm_extractor import CTFMExtractor
-from models.fmcib_extractor import FMCIBExtractor
-from models.vista3d_extractor import VISTA3DExtractor
-from models.voco_extractor import VocoExtractor
-from models.suprem_extractor import SUPREMExtractor
-from models.merlin_extractor import MerlinExtractor
-from models.medimageinsight_extractor import MedImageInsightExtractor
-from models.modelsgen_extractor import ModelsGenExtractor
-from models.pyramid_extractor import PyramidExtractorVar, PyramidExtractorNoVar, PyramidExtractorNumCrop1
-
+from models import CTClipVitExtractor, CTFMExtractor, FMCIBExtractor, MedImageInsightExtractor, MerlinExtractor, ModelsGenExtractor, PASTAExtractor, SUPREMExtractor, VISTA3DExtractor, VocoExtractor
 
 def get_model_list():
     """Return list of model classes to use for feature extraction."""
     return [
-        # FMCIBExtractor,
-        # CTFMExtractor,
-        PyramidExtractorVar,
-        PyramidExtractorNoVar,
-        PyramidExtractorNumCrop1,
-        # VISTA3DExtractor,
-        # VocoExtractor,
-        # SUPREMExtractor,
-        # MerlinExtractor,
-        # MedImageInsightExtractor,
-        # ModelsGenExtractor,
+        FMCIBExtractor,
+        CTFMExtractor,
+        CTClipVitExtractor,
+        PASTAExtractor,
+        VISTA3DExtractor,
+        VocoExtractor,
+        SUPREMExtractor,
+        MerlinExtractor,
+        MedImageInsightExtractor,
+        ModelsGenExtractor,
     ]
 
 
@@ -40,6 +30,7 @@ def extract_features_for_model(model_class, get_split_data_fn, preprocess_row_fn
     model.load()
 
     model_features = {}
+    model = model.to("cuda")
 
     with torch.no_grad():
         for split in ["train", "val", "test"]:
@@ -55,8 +46,12 @@ def extract_features_for_model(model_class, get_split_data_fn, preprocess_row_fn
                 row = preprocess_row_fn(row)
                 if row is None:
                     continue
+
+                
                 image = model.preprocess(row)
                 image = image.unsqueeze(0)
+
+                image = image.to("cuda")
                 feature = model.forward(image)
                 if isinstance(feature, torch.Tensor):
                     feature = feature.cpu().numpy()

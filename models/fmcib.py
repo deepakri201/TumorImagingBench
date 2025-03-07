@@ -1,7 +1,10 @@
 import torch
 import torch.nn as nn
 import monai
-from . import BaseModel, get_transforms
+
+from .utils import get_transforms
+from .base import BaseModel
+
 from fmcib.models import fmcib_model
 
 
@@ -15,9 +18,6 @@ class FMCIBExtractor(BaseModel):
             spatial_size=(48, 48, 48),
             spacing=(1, 1, 1),
         )
-
-    def load(self, weights_path: str = None):
-        pass
 
     def preprocess(self, x):
         return self.transforms(x)

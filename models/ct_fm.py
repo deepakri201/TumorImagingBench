@@ -2,7 +2,10 @@ import torch
 import torch.nn as nn
 import monai
 from fmcib.preprocessing import SeedBasedPatchCropd
-from . import BaseModel, get_transforms
+
+from .utils import get_transforms
+from .base import BaseModel
+
 from huggingface_hub import hf_hub_download
 from loguru import logger
 

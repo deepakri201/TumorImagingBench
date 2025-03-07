@@ -2,10 +2,12 @@ import torch
 import torch.nn as nn
 import monai
 from fmcib.preprocessing import SeedBasedPatchCropd
-from . import BaseModel, get_transforms
 from .unet3d import UNet3D
 from huggingface_hub import hf_hub_download
 from loguru import logger
+
+from .utils import get_transforms
+from .base import BaseModel
 
 class SUPREMExtractor(BaseModel):
     def __init__(self):

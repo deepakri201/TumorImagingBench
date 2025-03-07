@@ -2,7 +2,8 @@ import torch
 from transformer_maskgit import CTViT
 from huggingface_hub import hf_hub_download
 
-from . import BaseModel, get_transforms
+from .utils import get_transforms
+from .base import BaseModel
 
 
 class CTClipVitExtractor(BaseModel):

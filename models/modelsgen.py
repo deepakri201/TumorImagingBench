@@ -2,8 +2,10 @@ import torch
 import torch.nn as nn
 import monai
 import fmcib
-from . import BaseModel, get_transforms
 from huggingface_hub import hf_hub_download
+
+from .utils import get_transforms
+from .base import BaseModel
 
 class ModelsGenExtractor(BaseModel):
     def __init__(self):

@@ -3,8 +3,9 @@ import torch
 import merlin
 import monai.transforms
 from fmcib.preprocessing import SeedBasedPatchCropd
-from . import BaseModel, get_transforms
 
+from .utils import get_transforms
+from .base import BaseModel
 
 class MerlinExtractor(BaseModel):
     """Merlin model for extracting image and text embeddings"""

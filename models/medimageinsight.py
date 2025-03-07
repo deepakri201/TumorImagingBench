@@ -7,8 +7,9 @@ from PIL import Image
 import numpy as np
 from fmcib.preprocessing import SeedBasedPatchCropd
 from .medimageinsightmodel import MedImageInsight
-from . import BaseModel, get_transforms
 
+from .utils import get_transforms
+from .base import BaseModel
 
 class MedImageInsightExtractor(BaseModel):
     """MedImageInsight model for extracting image embeddings"""
