@@ -19,6 +19,9 @@ class FMCIBExtractor(BaseModel):
             spacing=(1, 1, 1),
         )
 
+    def load(self):
+        pass
+
     def preprocess(self, x):
         return self.transforms(x)
 

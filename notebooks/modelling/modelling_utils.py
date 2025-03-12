@@ -65,35 +65,61 @@ def evaluate_model(model, test_items, test_labels):
         return roc_auc_score(test_labels, test_predictions, multi_class='ovr')
 
 
-def plot_model_comparison(test_accuracies_dict, width=500, height=400, font_size=20, marker_color="#ADD8E6"):
+def plot_model_comparison(test_accuracies_dict, width=500, height=400, font_size=20, marker_color="#ADD8E6", yshift_annotation=20):
     """
     Create a minimalist and elegant bar plot comparing model performances using Plotly Express.
 
     Args:
-        test_accuracies_dict: Dictionary mapping model names to their test accuracies.
+        test_accuracies_dict: Dictionary mapping model names to their performance metrics.
+            Each value should be a dict with keys 'mean' and 'ci_95', where 'ci_95' is a tuple (lower_bound, upper_bound).
 
     Returns:
         Plotly figure object.
     """
+    # Extract model names, mean values, and compute error bars for the 95% CI.
+    model_names = list(test_accuracies_dict.keys())
+    means = [test_accuracies_dict[model]['mean'] for model in model_names]
+    error_y = [test_accuracies_dict[model]['ci95'][1] - test_accuracies_dict[model]['mean'] for model in model_names]
+    error_y_minus = [test_accuracies_dict[model]['mean'] - test_accuracies_dict[model]['ci95'][0] for model in model_names]
+
     fig = px.bar(
-        x=list(test_accuracies_dict.keys()),
-        y=list(test_accuracies_dict.values()),
-        labels={'x': 'Model', 'y': 'Accuracy'},
-        title='Test AUC Comparison',
+        x=model_names,
+        y=means,
+        error_y=error_y,
+        error_y_minus=error_y_minus,
+        labels={'x': 'Model', 'y': 'AUC'},
+        title='',
         template='simple_white',
         width=width,
         height=height
     )
-    # Use a subtle blue color and position text inside each bar with minimal formatting
-    fig.update_traces(marker_color=marker_color, marker_opacity=0.8, texttemplate='%{y:.2f}', textposition='auto')
+    # Use a subtle blue color and position text inside each bar with minimal formatting;
+    # update error bar thickness to make them thicker.
+    fig.update_traces(
+        marker_color=marker_color,
+        marker_opacity=0.8,
+        error_y=dict(width=10)
+    )
     fig.update_layout(
         margin=dict(l=20, r=20, t=40, b=20),
         xaxis=dict(showline=False, showgrid=False, tickfont=dict(size=font_size)),
-        yaxis=dict(showgrid=True, gridcolor='lightgrey', tickfont=dict(size=font_size)),
+        yaxis=dict(showgrid=False, tickfont=dict(size=font_size)),
         title=dict(x=0.5, xanchor='center'),
         font=dict(size=font_size, family="Arial"),
         showlegend=False
     )
+    
+    # Add annotations for mean scores positioned just above the upper confidence interval.
+    for model, mean, err in zip(model_names, means, error_y):
+        fig.add_annotation(
+            x=model,
+            y=mean + err,
+            text=f"{mean:.2f}",
+            showarrow=False,
+            yshift=yshift_annotation,
+            font=dict(size=font_size - 2, color="black")
+        )
+        
     return fig
 
 
@@ -146,7 +172,17 @@ def split_shuffle_data(items, labels, train_ratio=0.5, val_ratio=0.2, random_see
     return train_items, train_labels, val_items, val_labels, test_items, test_labels
 
 
-def extract_model_features(data, skip_model="MedImageInsightExtractor"):
+def apply_aggregation_filter(v, model_name):
+    if model_name == "MedImageInsightExtractor":
+        return v.mean(axis=0)
+    elif model_name == "CTClipVitExtractor":
+        return v.mean(axis=(1,2,3))
+    elif model_name == "PASTAExtractor":
+        return v.mean(axis=(2,3,4))        
+    else:
+        return v
+
+def extract_model_features(data):
     """
     Concatenate features from the train, validation, and test sets for each model.
 
@@ -161,14 +197,11 @@ def extract_model_features(data, skip_model="MedImageInsightExtractor"):
     """
     model_features = {}
     for model_name, splits in data.items():
-        if model_name == skip_model:
-            continue
-
         features_to_concat = []
         for split in ["train", "val", "test"]:
             if split in splits and splits[split]:
                 # Stack features for this split and add to the list.
-                split_features = np.vstack([entry["feature"] for entry in splits[split]])
+                split_features = np.vstack([apply_aggregation_filter(entry["feature"], model_name) for entry in splits[split]])
                 features_to_concat.append(split_features)
         # Concatenate all split features along axis 0 if any exist; otherwise, use an empty array.
         model_features[model_name] = np.concatenate(features_to_concat, axis=0) if features_to_concat else np.array([])
@@ -235,7 +268,7 @@ def compute_overlap_matrix(model_neighbors):
     return overlap_matrix, model_list
 
 
-def plot_overlap_matrix(overlap_matrix, model_list, title="Mutual k-Nearest Neighbors Overlap Scores", width=600, tickangle=45):
+def plot_overlap_matrix(overlap_matrix, model_list, title="Mutual k-Nearest Neighbors Overlap Scores", width=1200, height=1200, color="Greens", tickangle=90, font_size=30):
     """
     Plot the mutual k-nearest neighbor overlap matrix using Plotly Express.
 
@@ -251,15 +284,24 @@ def plot_overlap_matrix(overlap_matrix, model_list, title="Mutual k-Nearest Neig
     """
     fig = px.imshow(
         overlap_matrix,
-        labels={"x": "Model", "y": "Model", "color": "Average Overlap"},
+        labels={"x": "Model", "y": "Model", "color": "Overlap"},
         x=model_list,
         y=model_list,
-        color_continuous_scale="Blues"
+        color_continuous_scale=color
     )
     fig.update_layout(
-        title=title,
+        title="",
         width=width,
+        height=height,
+        font=dict(size=font_size, family="Arial"),
         xaxis_tickangle=tickangle,
-        template="simple_white"
+        template="simple_white",
+        coloraxis_colorbar=dict(
+        yanchor="bottom",
+        y=1.02,  # Position slightly above the plot
+        x=0.5,   # Center horizontally
+        xanchor="center",
+        orientation="h"  # Horizontal orientation
+    )
     )
     return fig
