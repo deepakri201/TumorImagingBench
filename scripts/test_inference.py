@@ -58,6 +58,10 @@ def main(args):
         "coordY": coordY,
         "coordZ": coordZ
     }
+
+    total_params = sum(p.numel() for p in model.model.parameters())
+    total_params_million = total_params / 1e6
+    print(f"Model parameter count: {total_params_million:.2f}M")
     preprocessed_input = model.preprocess(input_dict)
     preprocessed_input = preprocessed_input.unsqueeze(0).to(device)
     print(f"Preprocessed input shape: {preprocessed_input.shape}")
