@@ -73,4 +73,4 @@ class MedImageInsightExtractor(BaseModel):
         """
         base64_images = self._convert_to_base64(image)
         results = self.model.encode(images=base64_images)
-        return results["image_embeddings"]
+        return torch.tensor(results["image_embeddings"]).to("cuda:0")

@@ -52,6 +52,7 @@ class CTClipVitExtractor(BaseModel):
     def preprocess(self, x):
         return self.transforms(x)
 
-    def forward(self, x):
+    def forward(self, x, avg=True):
         with torch.no_grad():
-            return self.model(x, return_encoded_tokens=True)
+            out = self.model(x, return_encoded_tokens=True)
+            return torch.nn.functional.adaptive_avg_pool3d(out, 1).flatten(start_dim=1) if avg else out

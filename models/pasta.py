@@ -39,9 +39,10 @@ class PASTAExtractor(BaseModel):
     def preprocess(self, x):
         return self.transforms(x)
 
-    def forward(self, x):
+    def forward(self, x, avg=True):
         with torch.no_grad():
-            return self.model(x)
+            out = self.model(x)
+            return torch.nn.functional.adaptive_avg_pool3d(out, 1).flatten(start_dim=1) if avg else out
 
 if __name__ == "__main__":
     # Create an instance of the extractor and load model weights
