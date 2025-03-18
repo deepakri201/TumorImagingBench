@@ -213,6 +213,7 @@ def main():
     for encoder_name, encoder_class in models.items():
         try:
             encoder = encoder_class()
+            encoder.load()
             encoder.to(args.device)
             
             for dataset_name, dataset_path in datasets.items():
