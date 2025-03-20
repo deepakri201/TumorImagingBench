@@ -55,4 +55,5 @@ class CTClipVitExtractor(BaseModel):
     def forward(self, x, avg=True):
         with torch.no_grad():
             out = self.model(x, return_encoded_tokens=True)
+            out = out.permute(0, 4, 1, 2, 3) # Make it NCDHW where C is feature dim
             return torch.nn.functional.adaptive_avg_pool3d(out, 1).flatten(start_dim=1) if avg else out
