@@ -1,68 +1,81 @@
-# FM-extractors-radiomics
+# TumorImagingBench
 
-A framework for evaluating and comparing different foundation model extractors for radiomics in medical imaging.
+<div align="center">
 
-## Overview
+**A comprehensive framework for evaluating and comparing foundation model feature extractors for radiomics in medical imaging.**
 
-This repository provides tools, models, and evaluation scripts to:
+</div>
 
-1. Extract features from medical images using various foundation models
-2. Compare performance across different radiomics datasets
-3. Analyze the stability, robustness, and interpretability of these models
-4. Facilitate benchmarking of new foundation models against established ones
+## 📋 Overview
 
-## Repository Structure
+TumorImagingBench is a robust platform that enables researchers and practitioners to:
 
-- `models/`: Implementations of various foundation model extractors
-  - CT-CLIP, FMCIB, PASTA, VISTA3D, MedImageInsight, and more
-- `notebooks/`:
-  - `modelling/`: Notebooks for modeling on different medical datasets
-    - LUNA, DLCS, NSCLC Radiomics, NSCLC Radiogenomics, C4KC-KiTs, Colorectal Liver Metastases
-  - `analysis/`: Analysis of model performance, robustness, stability, and saliency
-- `scripts/`: Utility scripts for batch processing and analysis
-  - `generate_saliency_maps.py`: Generate saliency maps for model interpretability
-- `data/`: Directory for datasets (not tracked in git)
-- `utils/`: Utility functions for data processing and analysis
-- `evaluation/`: Evaluation metrics and protocols
+* Extract meaningful features from medical images using state-of-the-art foundation models
+* Compare performance metrics across diverse radiomics datasets
+* Systematically evaluate model stability, robustness, and interpretability 
+* Benchmark novel foundation models against established approaches
 
-## Supported Models
+This framework bridges the gap between advancing foundation models and their practical application in medical imaging analysis.
 
-- FMCIB (Foundation Model for Cancer Image Biomarkers)
-- CT-FM (CT Foundation Model)
-- CT-CLIP-ViT
-- PASTA
-- VISTA3D
-- Voco
-- SUPREM
-- Merlin
-- MedImageInsight
-- ModelsGen
+## 🔍 Key Features
 
-## Supported Datasets
+* **Unified Interface**: Common API for all foundation model extractors
+* **Comprehensive Evaluation**: Standardized metrics across multiple datasets
+* **Interpretability Tools**: Generation of saliency maps and attribution analysis
+* **Extensible Architecture**: Easily integrate new models and datasets
 
-- LUNA16
-- DLCS (Duke Lung Cancer Dataset)
-- NSCLC Radiomics
-- NSCLC Radiogenomics
-- C4KC-KiTs (Clear Cell Renal Cell Carcinoma Kidney Tumor Segmentation)
-- Colorectal Liver Metastases
+## 📂 Repository Structure
 
-## Installation
+```
+FM-extractors-radiomics/
+├── models/              # Foundation model implementations
+├── notebooks/           
+│   ├── modelling/       # Dataset-specific modeling notebooks
+│   └── analysis/        # Performance, robustness, and stability analysis
+├── scripts/             # Utility scripts for batch processing
+├── data/                # Dataset directory (not tracked in git)
+├── utils/               # Utility functions for data processing
+└── evaluation/          # Evaluation metrics and protocols
+```
+
+## 🧠 Supported Foundation Models
+
+| Model | Description |
+|-------|-------------|
+| **FMCIB** | Foundation Model for Cancer Image Biomarkers |
+| **CT-FM** | CT Foundation Model |
+| **CT-CLIP-ViT** | CT-specific CLIP Vision Transformer |
+| **PASTA** | Pathology and Radiology Image Analysis Model |
+| **VISTA3D** | 3D Vision Transformer for Medical Imaging |
+| **Voco** | Volumetric Contrastive Learning Model |
+| **SUPREM** | Supervised Pretraining for Medical Imaging |
+| **Merlin** | Multi-modal Embedding for Radiology and Learning |
+| **MedImageInsight** | Medical Image Understanding Framework |
+| **ModelsGen** | Generative Foundation Models for Medical Imaging |
+
+## 📊 Supported Datasets
+
+* **LUNA16**: Lung Nodule Analysis
+* **DLCS**: Duke Lung Cancer Dataset
+* **NSCLC Radiomics**: Non-Small Cell Lung Cancer
+* **NSCLC Radiogenomics**: Radiogenomic Analysis of NSCLC
+* **C4KC-KiTs**: Clear Cell Renal Cell Carcinoma Kidney Tumor Segmentation
+* **Colorectal Liver Metastases**: Liver Metastases Dataset
+
+## 💻 Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/FM-extractors-radiomics.git
-cd FM-extractors-radiomics
+git clone https://github.com/AIM-Harvard/TumorImagingBench.git
+cd TumorImagingBench
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-## Usage
+## 🚀 Usage
 
 ### Feature Extraction
-
-To extract features from medical images using the implemented models:
 
 ```python
 from models import CTClipVitExtractor, FMCIBExtractor
@@ -74,24 +87,32 @@ model.load()
 # Extract features from a sample
 features = model.extract(sample_path)
 ```
-Feature extraction is offered through systematic scripts for each dataset provided in [evaluation](./evaluation/). A base feature extractor can be extended for a new dataset. 
+
+For systematic feature extraction across datasets, we provide dedicated scripts in the `evaluation/` directory. These scripts offer a standardized approach that can be extended to new datasets through our base feature extractor class.
 
 ### Model Evaluation
 
-Explore the notebooks in the `notebooks/modelling/` directory to see examples of model evaluation on different datasets.
+For examples of model evaluation on different datasets, explore the notebooks in the `notebooks/modelling/` directory. These notebooks demonstrate:
 
-## Analysis
+* Feature extraction workflows
+* Model training and validation
+* Performance analysis and comparison
+* Visualization of results
 
-The repository includes several analysis notebooks:
+## 📈 Analysis Tools
 
-- `stability_analysis.ipynb`: Evaluate model stability to different perturbations
-- `robustness_analysis.ipynb`: Assess model robustness
-- `saliency_analysis.ipynb`: Visualize and analyze model saliency maps
-- `overall_analysis.ipynb`: Aggregate performance analysis across datasets and models
+Our repository includes specialized analysis notebooks:
 
-## Contributing
+| Notebook | Purpose |
+|----------|---------|
+| `stability_analysis.ipynb` | Evaluate model stability with various perturbations |
+| `robustness_analysis.ipynb` | Assess model robustness to noise and transformations |
+| `saliency_analysis.ipynb` | Visualize and analyze model activation maps |
+| `overall_analysis.ipynb` | Compare aggregate performance across models and datasets |
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## 🤝 Contributing
+
+We welcome contributions to improve this framework! Here's how you can contribute:
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -99,10 +120,29 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## Citation
+### Development Guidelines
+
+* Follow the existing code style and documentation patterns
+* Add tests for new functionality
+* Update documentation to reflect changes
+* Ensure backward compatibility where possible
+
+## 📚 Citation
 
 If you use this framework in your research, please cite:
 
+```bibtex
+@article{TumorImagingBench,
+  title={Foundation model embeddings for quantitative tumor imaging biomarkers},
+  author={}, 
+  journal={},
+  year={},
+  volume={},
+  pages={},
+  publisher={}
+}
 ```
-[Citation information to be added]
-```
+
+## 📄 License
+
+This project is licensed under the [LICENSE NAME] - see the LICENSE file for details.
