@@ -1,0 +1,35 @@
+[project]
+name = "tumorimagingbench"
+version = "0.1.2"
+description = "A package for tumor imaging feature extraction and benchmarking."
+authors = [
+    { name = "Suraj Pai", email = "bspai@bwh.harvard.edu" }
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "torch",
+    "pandas",
+    "numpy==1.26.4",
+    "scikit-learn",
+    "transformers",
+    "multiprocess",
+    "huggingface-hub",
+    "merlin-vlm",
+    "itk",
+    "foundation-cancer-image-biomarker",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tumorimagingbench"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.uv]
+prerelease = "allow"
+

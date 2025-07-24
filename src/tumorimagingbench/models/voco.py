@@ -1,7 +1,5 @@
 import torch
-import torch.nn as nn
 import monai
-from fmcib.preprocessing import SeedBasedPatchCropd
 from huggingface_hub import hf_hub_download
 from loguru import logger
 
@@ -12,7 +10,6 @@ class VocoExtractor(BaseModel):
     def __init__(self):
         super().__init__()
         self.model = monai.networks.nets.SwinUNETR(
-            img_size=(64, 64, 64),
             in_channels=1,
             out_channels=2,
             feature_size=192,
