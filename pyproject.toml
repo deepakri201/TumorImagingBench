@@ -6,11 +6,11 @@ authors = [
     { name = "Suraj Pai", email = "bspai@bwh.harvard.edu" }
 ]
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10,<3.13"
 dependencies = [
     "torch",
-    "pandas",
-    "numpy==1.26.4",
+    "pandas>=1.5.3,<2.0.0",
+    "numpy",
     "scikit-learn",
     "transformers",
     "multiprocess",
