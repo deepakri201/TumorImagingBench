@@ -70,7 +70,7 @@ git clone https://github.com/AIM-Harvard/TumorImagingBench.git
 cd TumorImagingBench
 
 # Install dependencies
-pip install -r requirements.txt
+uv sync
 ```
 
 ## 🚀 Usage
