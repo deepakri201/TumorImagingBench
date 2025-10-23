@@ -5,22 +5,36 @@ import pickle
 import multiprocessing
 
 sys.path.append('..')
-from models import CTClipVitExtractor, CTFMExtractor, FMCIBExtractor, MedImageInsightExtractor, MerlinExtractor, ModelsGenExtractor, PASTAExtractor, SUPREMExtractor, VISTA3DExtractor, VocoExtractor
+# from models import CTClipVitExtractor, CTFMExtractor, FMCIBExtractor, MedImageInsightExtractor, MerlinExtractor, ModelsGenExtractor, PASTAExtractor, SUPREMExtractor, VISTA3DExtractor, VocoExtractor
+from models import CTFMExtractor, FMCIBExtractor, MerlinExtractor, ModelsGenExtractor, PASTAExtractor, SUPREMExtractor, VISTA3DExtractor, VocoExtractor
+
 
 def get_model_list():
     """Return list of model classes to use for feature extraction."""
     return [
         FMCIBExtractor,
         CTFMExtractor,
-        CTClipVitExtractor,
         PASTAExtractor,
         VISTA3DExtractor,
         VocoExtractor,
         SUPREMExtractor,
         MerlinExtractor,
-        MedImageInsightExtractor,
         ModelsGenExtractor,
     ]
+
+    # return [
+    #     FMCIBExtractor,
+    #     CTFMExtractor,
+    #     CTClipVitExtractor,
+    #     PASTAExtractor,
+    #     VISTA3DExtractor,
+    #     VocoExtractor,
+    #     SUPREMExtractor,
+    #     MerlinExtractor,
+    #     MedImageInsightExtractor,
+    #     ModelsGenExtractor,
+    # ]
+
 
 
 def extract_features_for_model(model_class, get_split_data_fn, preprocess_row_fn):
@@ -30,7 +44,7 @@ def extract_features_for_model(model_class, get_split_data_fn, preprocess_row_fn
     model.load()
 
     model_features = {}
-    model = model.to("cuda")
+    # model = model.to("cuda")
 
     with torch.no_grad():
         for split in ["train", "val", "test"]:
@@ -51,7 +65,7 @@ def extract_features_for_model(model_class, get_split_data_fn, preprocess_row_fn
                 image = model.preprocess(row)
                 image = image.unsqueeze(0)
 
-                image = image.to("cuda")
+                # image = image.to("cuda")
                 feature = model.forward(image)
                 if isinstance(feature, torch.Tensor):
                     feature = feature.cpu().numpy()

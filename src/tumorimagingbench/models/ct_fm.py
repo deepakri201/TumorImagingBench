@@ -35,7 +35,8 @@ class CTFMExtractor(BaseModel):
                 filename="pretrained_segresnet.torch",
             )
 
-        weights = torch.load(weights_path)
+        # weights = torch.load(weights_path)
+        weights = torch.load(weights_path, map_location=torch.device('cpu'))
         weights = {
             k.replace("encoder.", ""): v for k, v in weights.items()
         }
