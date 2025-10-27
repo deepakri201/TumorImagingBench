@@ -3,7 +3,7 @@ TumorImagingBench: A comprehensive framework for evaluating and comparing
 foundation model feature extractors for radiomics in medical imaging.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.4"
 __author__ = "Suraj Pai"
 __email__ = "bspai@bwh.harvard.edu"
 

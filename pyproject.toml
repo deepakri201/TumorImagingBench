@@ -1,6 +1,6 @@
 [project]
 name = "tumorimagingbench"
-version = "0.1.2"
+version = "0.1.4"
 description = "A package for tumor imaging feature extraction and benchmarking."
 authors = [
     { name = "Suraj Pai", email = "bspai@bwh.harvard.edu" }
