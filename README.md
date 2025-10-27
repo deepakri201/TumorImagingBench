@@ -65,6 +65,12 @@ FM-extractors-radiomics/
 ## 💻 Installation
 
 ```bash
+
+# Create new environment
+uv venv
+
+# Activate the environment
+
 # Clone the repository
 git clone https://github.com/AIM-Harvard/TumorImagingBench.git
 cd TumorImagingBench
