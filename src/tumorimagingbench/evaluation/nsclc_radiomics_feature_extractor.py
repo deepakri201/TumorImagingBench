@@ -1,13 +1,14 @@
 import pandas as pd
 from base_feature_extractor import extract_all_features, save_features
+from functools import partial
 
 
-def get_split_data(split):
-    """Get NSCLC-Radiomics dataset split."""
+def get_split_data(split, train_csv, val_csv, test_csv):
+    """Get dataset split."""
     split_paths = {
-        "train": "/home/suraj/Repositories/FM-extractors-radiomics/data/eval/nsclc_radiomics/train_annotations.csv",
-        "val": "/home/suraj/Repositories/FM-extractors-radiomics/data/eval/nsclc_radiomics/val_annotations.csv",
-        "test": "/home/suraj/Repositories/FM-extractors-radiomics/data/eval/nsclc_radiomics/test_annotations.csv"
+        "train": train_csv,
+        "val": val_csv,
+        "test": test_csv
     }
     if split not in split_paths:
         raise ValueError(f"Invalid split: {split}")
@@ -19,17 +20,80 @@ def preprocess_row(row):
     return row
 
 
-def extract_features(output_path):
-    """Extract features for the NSCLC-Radiomics dataset."""
-    features = extract_all_features(get_split_data, preprocess_row)
+def extract_features(output_path, train_csv, val_csv, test_csv, model_names=None):
+    """
+    Extract features for the NSCLC-Radiomics dataset.
+
+    Parameters:
+    -----------
+    output_path : str
+        Where to save extracted features
+    train_csv : str
+        Path to training annotations CSV
+    val_csv : str
+        Path to validation annotations CSV
+    test_csv : str
+        Path to test annotations CSV
+    model_names : list of str, optional
+        Specific models to extract (if None, uses all available)
+    """
+    features = extract_all_features(partial(get_split_data, train_csv=train_csv, val_csv=val_csv, test_csv=test_csv), preprocess_row, model_names=model_names)
     save_features(features, output_path)
 
 
 if __name__ == "__main__":
     import argparse
-    
-    parser = argparse.ArgumentParser(description="Extract features for the NSCLC-Radiomics dataset")
-    parser.add_argument("--output", type=str, default="features/nsclc_radiomics.pkl", 
-                        help="Path where to save the extracted features")
+
+    parser = argparse.ArgumentParser(
+        description="Extract features for the NSCLC-Radiomics dataset",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Extract using all available models
+  python nsclc_radiomics_feature_extractor.py --output features/nsclc_radiomics.pkl
+
+  # Extract using specific models
+  python nsclc_radiomics_feature_extractor.py --output features/nsclc_radiomics.pkl \\
+    --models DummyResNetExtractor CTClipVitExtractor
+
+  # Extract with custom paths
+  python nsclc_radiomics_feature_extractor.py --output features/nsclc_radiomics.pkl \\
+    --train-csv /path/to/train.csv \\
+    --val-csv /path/to/val.csv \\
+    --test-csv /path/to/test.csv
+        """
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="features/nsclc_radiomics.pkl",
+        help="Path where to save extracted features (default: features/nsclc_radiomics.pkl)"
+    )
+    parser.add_argument(
+        "--train-csv",
+        type=str,
+        default="/home/suraj/Repositories/TumorImagingBench/data/eval/nsclc_radiomics/train_annotations.csv",
+        help="Path to training annotations CSV"
+    )
+    parser.add_argument(
+        "--val-csv",
+        type=str,
+        default="/home/suraj/Repositories/TumorImagingBench/data/eval/nsclc_radiomics/val_annotations.csv",
+        help="Path to validation annotations CSV"
+    )
+    parser.add_argument(
+        "--test-csv",
+        type=str,
+        default="/home/suraj/Repositories/TumorImagingBench/data/eval/nsclc_radiomics/test_annotations.csv",
+        help="Path to test annotations CSV"
+    )
+    parser.add_argument(
+        "--models",
+        type=str,
+        nargs="+",
+        default=None,
+        help="Specific models to extract (space-separated)"
+    )
+
     args = parser.parse_args()
-    extract_features(args.output)
+    extract_features(args.output, args.train_csv, args.val_csv, args.test_csv, args.models)

@@ -4,23 +4,44 @@ from tqdm import tqdm
 import pickle
 import multiprocessing
 
-sys.path.append('..')
-from models import CTClipVitExtractor, CTFMExtractor, FMCIBExtractor, MedImageInsightExtractor, MerlinExtractor, ModelsGenExtractor, PASTAExtractor, SUPREMExtractor, VISTA3DExtractor, VocoExtractor
+from tumorimagingbench.models import get_available_extractors, get_extractor
 
-def get_model_list():
-    """Return list of model classes to use for feature extraction."""
-    return [
-        FMCIBExtractor,
-        CTFMExtractor,
-        CTClipVitExtractor,
-        PASTAExtractor,
-        VISTA3DExtractor,
-        VocoExtractor,
-        SUPREMExtractor,
-        MerlinExtractor,
-        MedImageInsightExtractor,
-        ModelsGenExtractor,
-    ]
+def get_model_list(model_names=None):
+    """
+    Return list of model classes to use for feature extraction.
+
+    Parameters:
+    -----------
+    model_names : list of str, optional
+        Specific model names to extract. If None, uses all available models.
+        Example: ['DummyResNetExtractor', 'CTClipVitExtractor']
+
+    Returns:
+    --------
+    list
+        List of model classes ready for instantiation
+
+    Notes:
+    ------
+    - Handles missing dependencies gracefully
+    - Models are retrieved dynamically from the models registry
+    """
+    if model_names is None:
+        model_names = get_available_extractors()
+
+    model_classes = []
+    for name in model_names:
+        try:
+            model_cls = get_extractor(name)
+            model_classes.append(model_cls)
+        except ValueError as e:
+            print(f"Warning: {e}")
+            continue
+
+    if not model_classes:
+        raise RuntimeError("No valid models found")
+
+    return model_classes
 
 
 def extract_features_for_model(model_class, get_split_data_fn, preprocess_row_fn):
@@ -63,10 +84,28 @@ def extract_features_for_model(model_class, get_split_data_fn, preprocess_row_fn
     return model_features
 
 
-def extract_all_features(get_split_data_fn, preprocess_row_fn):
-    """Extract features using all models."""
+def extract_all_features(get_split_data_fn, preprocess_row_fn, model_names=None):
+    """
+    Extract features using available models.
+
+    Parameters:
+    -----------
+    get_split_data_fn : callable
+        Function that takes split name and returns DataFrame
+    preprocess_row_fn : callable
+        Function that preprocesses a single row
+    model_names : list of str, optional
+        Specific models to use. If None, uses all available models.
+
+    Returns:
+    --------
+    dict
+        Dictionary with model names as keys and features as values
+    """
     feature_dict = {}
-    model_classes = get_model_list()
+    model_classes = get_model_list(model_names=model_names)
+
+    print(model_classes)
 
     with multiprocessing.Pool() as pool:
         results = pool.starmap(

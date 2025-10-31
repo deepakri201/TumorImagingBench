@@ -1,16 +1,14 @@
 import pandas as pd
 from base_feature_extractor import extract_all_features, save_features
+from functools import partial
 
 
-def get_split_data(split):
-    """Get dataset split for C4C-KiTS."""
-    split_paths = {
-        "train": "/home/suraj/Repositories/FM-extractors-radiomics/data/eval/c4c-kits/data.csv",
-    }
-    if split not in split_paths:
-        print(f"Warning: Invalid split '{split}' for C4C-KiTS dataset.")
+def get_split_data(split, data_csv_path):
+    """Get dataset split."""
+    # This dataset only has training data
+    if split != "train":
         return None
-    return pd.read_csv(split_paths[split])
+    return pd.read_csv(data_csv_path)
 
 
 def preprocess_row(row):
@@ -18,17 +16,19 @@ def preprocess_row(row):
     return row
 
 
-def extract_features(output_path):
+def extract_features(output_path, data_csv_path, model_names=None):
     """Extract features for the C4C-KiTS dataset."""
-    features = extract_all_features(get_split_data, preprocess_row)
+    features = extract_all_features(partial(get_split_data, data_csv_path=data_csv_path), preprocess_row, model_names=model_names)
     save_features(features, output_path)
 
 
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Extract features for the C4C-KiTS dataset")
-    parser.add_argument("--output", type=str, default="features/c4c_kits.pkl", 
+    parser.add_argument("--output", type=str, default="features/c4c_kits.pkl",
                         help="Path where to save the extracted features")
+    parser.add_argument("--data-csv", type=str, default="/home/suraj/Repositories/TumorImagingBench/data/eval/c4c-kits/data.csv", help="Path to dataset CSV")
+    parser.add_argument("--models", type=str, nargs="+", default=None, help="Specific models to extract")
     args = parser.parse_args()
-    extract_features(args.output)
+    extract_features(args.output, args.data_csv, args.models)
