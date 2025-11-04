@@ -1,0 +1,29 @@
+Description,Structure,ICD-03
+Mucin-producing adenocarcinoma,mucin_producing_adenocarcinoma,8481
+Signet ring cell carcinoma,signet_ring_cell_carcinoma,8490
+"Sq. cell carcinoma, keratinizing, NOS",squamous_cell_carcinoma_keratinizing,8071
+"Bronchiolo-alveolar carcinoma, non-mucinous",bronchiolo_alveolar_carcinoma_non_mucinous,8252
+Adenocarcinoma with squamous metaplasia,adenocarcinoma_with_squamous_metaplasia,8570
+Mixed cell adenocarcinoma,mixed_cell_adenocarcinoma,8323
+"Carcinoma in situ, NOS",carcinoma_in_situ,8010
+"Papillary adenocarcinoma, NOS",papillary_adenocarcinoma,8050
+Oat cell carcinoma,oat_cell_carcinoma,8042
+Mixed invasive mucinous and non-mucinous adenocarcinoma,mixed_invasive_mucinous_and_non_mucinous_adenocarcinoma,8254
+Non-small cell carcinoma,non_small_cell_carcinoma,8046
+Adenocarcinoma with mixed subtypes,adenocarcinoma_with_mixed_subtypes,8255
+"Sq. cell carcinoma, lg. cell, non-ker",squamous_cell_carcinoma_large_cell_nonkeratinizing,8072
+Invasive mucinous adenocarcinoma,invasive_mucinous_adenocarcinoma,8253
+Neuroendocrine carcinoma,neuroendocrine_carcinoma,8246
+"Squamous cell carcinoma, NOS",squamous_cell_carcinoma,8070
+Mucinous adenocarcinoma,mucinous_adenocarcinoma,8480
+"Neoplasm, malignant",neoplasm_malignant,8000
+Large cell neuroendocrine carcinoma,large_cell_neuroendocrine_carcinoma,8013
+Combined small cell carcinoma,combined_small_cell_carcinoma,8045
+"Adenocarcinoma, NOS",adenocarcinoma,8140
+Adenosquamous carcinoma,adenosquamous_carcinoma,8560
+Acinar cell carcinoma,acinar_cell_carcinoma,8550
+Basaloid squamous cell carcinoma,basaloid_squamous_cell_carcinoma,8083
+"Large cell carcinoma, NOS",large_cell_carcinoma,8012
+Lepidic adenocarcinoma,lepidic_adenocarcinoma,8250
+"Carcinoid tumor, malignant",carcinoid_tumor_malignant,8240
+"Small cell carcinoma, NOS",small_cell_carcinoma,8041
