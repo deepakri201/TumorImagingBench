@@ -31,6 +31,14 @@ packages = ["src/tumorimagingbench"]
 [tool.hatch.metadata]
 allow-direct-references = true
 
+[project.optional-dependencies]
+ct-clip = [
+    "transformer-maskgit @ git+https://github.com/ibrahimethemhamamci/CT-CLIP.git@main#subdirectory=transformer_maskgit"
+]
+jupyter = [
+    "jupyter"
+]
+
 [tool.uv]
 prerelease = "allow"
 
