@@ -82,6 +82,7 @@ class DummyResNetExtractor(BaseModel):
         # Load pre-trained ResNet-18 from torchvision
         # This model is trained on ImageNet (2D images)
         self.resnet18 = nets.resnet18(feed_forward=False, n_input_channels=1)
+        self.resnet18.to("cuda" if torch.cuda.is_available() else "cpu")
         self.transforms = get_transforms()
 
     def load(self, weights_path: str = None):

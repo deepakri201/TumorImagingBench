@@ -13,6 +13,7 @@ class SUPREMExtractor(BaseModel):
     def __init__(self):
         super().__init__()
         self.model = UNet3D(n_class=1)
+        self.model.to("cuda" if torch.cuda.is_available() else "cpu")
         self.transforms = get_transforms(
             orient="RAS",
             scale_range=(-1024, 2048),

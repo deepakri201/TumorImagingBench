@@ -24,6 +24,7 @@ class CTClipVitExtractor(BaseModel):
             dim_head=32,
             heads=8
         )
+        self.model.to("cuda" if torch.cuda.is_available() else "cpu")
         self.transforms = get_transforms(
             orient="SLP",
             scale_range=(-1000, 1000),

@@ -20,6 +20,7 @@ class CTFMExtractor(BaseModel):
                 start_dim=1
             ),  # Get only the last feature across block levels and average pool it.
         )
+        self.model.to("cuda" if torch.cuda.is_available() else "cpu")
         self.transforms = get_transforms(
             orient="SPL",
             scale_range=(-1024, 2048),

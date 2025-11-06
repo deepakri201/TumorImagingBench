@@ -12,6 +12,7 @@ class FMCIBExtractor(BaseModel):
     def __init__(self):
         super().__init__()
         self.model = fmcib_model()  # By default the model is in eval mode. Set to false if you want to train it
+        self.model.to("cuda" if torch.cuda.is_available() else "cpu")
         self.transforms = get_transforms(
             orient="SPL",
             scale_range=(-1024, 2048),

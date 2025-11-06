@@ -12,6 +12,7 @@ class PASTAExtractor(BaseModel):
     def __init__(self):
         super().__init__()
         self.model = Generic_UNet(input_channels=1)
+        self.model.to("cuda" if torch.cuda.is_available() else "cpu")
         self.transforms = get_transforms(
             orient="LPS", # Refer: https://github.com/LWHYC/PASTA/blob/main/preprocess/NifitiStandard.py
             scale_range=(-1024, 2048),

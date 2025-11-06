@@ -15,6 +15,7 @@ class VocoExtractor(BaseModel):
             feature_size=192,
             use_v2=True,
         )
+        self.model.to("cuda" if torch.cuda.is_available() else "cpu")
         self.transforms = get_transforms(
             orient="RAS",
             scale_range=(-1024, 2048),
