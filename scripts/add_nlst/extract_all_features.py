@@ -44,7 +44,6 @@ test_filename = os.path.join(output_directory, "test.csv")
 ### Functions ###
 #################
 
-# For the histology classification 
 def get_split_data_fn(split):
     """Get dataset split."""
     split_paths = {
